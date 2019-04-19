@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Canvasでお絵描き</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <p>
+        <select id="penColor">
+            <option value="black">黒</option>
+            <option value="red">赤</option>
+            <option value="blue">青</option>
+            <option value="white">白</option>
+
+        </select>
+        <select id="penWidth">
+            <option value="1">細</option>
+            <option value="3">中</option>
+            <option value="5">太</option>
+            </select>
+        <input type="button"id="erase"value="消去">
+        <input type="button" id="save"value="保存">
+    </p>
+    <canvas width="800"height="600"id="mycanvas">
+        Canvasに対応したブラウザを用意してください。
+    </canvas>
+    <div id="gallery"></div>
+    <script src="js/main.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+    <script>
+        $(function(){
+            var canvas = document.getElementById('mycanvas');
+            if(!canvas || !canvas.getContext )  return false;
+            var ctx = canvas.getContext('2d');
+
+            var startX,startY,x,y,bordtrWidth = 10,isDrawing=false;
+
+            $('#mycanvas').mousedown(function(e){
+                isDrawing=true
+                startX = e.pageX - $(this).offset().left - bordtrWidth;
+                startY = e.pageY - $(this).offset().top - bordtrWidth;
+
+            })
+            .mousemove(function(e){
+                if(isDrawing===false) return false;
+                x = e.pageX - $(this).offset().left - bordtrWidth;
+                y = e.pageY - $(this).offset().top - bordtrWidth;
+                ctx.beginPath();
+                ctx.moveTo(startX,startY);
+                ctx.lineTo(x,y);
+                ctx.stroke();
+                startX = x;
+                startY = y;
+
+            })
+            .mouseup(function(){
+                isDrawing = false;
+            })
+            .mouseleave(function(){
+                isDrawing = false;
+            })
+
+            $('#penColor').change(function(){
+                ctx.strokeStyle = $(this).val();
+            });
+
+            $('#penWidth').change(function(){
+                ctx.lineWidth = $(this).val();
+            });
+
+            $('#erase').click(function(){
+                if(!confirm('本当に消去しますか?')) return ;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            });
+
+            $('#save').click(function(){
+               var img=$('<img>').attr({
+                   width:100,width:50,
+                   src:canvas.toDataURL()
+               });
+               var link = $('<a>').attr({
+                   href:canvas.toDataURL().replace('image/png','application/octet-stream'),
+                   download: new Date().getTime()+'.png'
+               })
+            //    $('#gallery').append(img.addClass('thumbnail'));
+                $('#gallery').append(link.append(img.addClass('thumbnail')));
+               ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            });
+
+
+
+        })
+    </script>
+</body>
+</html>
